@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { Form, Button, Space, Upload, Popconfirm, Tag, Input, InputNumber, Divider } from 'antd';
+import copy from 'copy-to-clipboard'
+import { Form, Button, Input, InputNumber, Divider, Message } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 
 const layout = {
@@ -58,12 +59,9 @@ class Home extends Component {
     let items = this.state.items.filter(t => t.id != id);
     this.setState({
       items: items
+    }, () => {
+      this.setContent(items);
     });
-    let content = this.getContent();
-    this.setState({
-      content: content
-    });
-
   }
 
   refreshContent = (e) => {
@@ -78,17 +76,14 @@ class Home extends Component {
         v.text = value;
       }
     });
-    let content = this.getContent();
     this.setState({
-      items: items,
-      content: content
+      items: items
+    }, () => {
+      this.setContent(items);
     });
-
-
   }
 
-  getContent = () => {
-    let items = this.state.items;
+  setContent = (items) => {
     let count = 1;
     items.forEach(function (v) {
       if (v.type == 'num' && v.text && parseInt(v.text) > count) {
@@ -99,20 +94,36 @@ class Home extends Component {
     for (let i = 0; i < count; i++) {
       let item = '';
       items.forEach(function (v) {
-        if (v.type == 'input') {
-          item += v.text;
-        } if (v.type == 'num') {
-          item += '' + i;
+        if (v.text) {
+          if (v.type == 'input') {
+            item += v.text;
+          } if (v.type == 'num') {
+            item += '' + i;
+          }
         }
       });
       str.push(item);
     }
-    return str;
+    this.setState({
+      content: str
+    });
   }
 
+  copyToClipboard = () => {
+    let content = this.state.content;
+    let v = '';
+    content.forEach(function (c) {
+      v += c + '\r\n';
+    });
+    if (v === '') {
+      Message.error('无可复制的内容');
+      return;
+    }
+    copy(v);
+    Message.success('复制成功');
+  }
   render() {
     let { items, content } = { ...this.state };
-    console.log(content);
     return (
       <Form
         {...formItemLayoutWithOutLabel}
@@ -151,64 +162,6 @@ class Home extends Component {
               </Form.Item>
             )
         ))}
-        {/* <Form.List
-          name="names"
-        >
-          {(fields, { add, remove }, { errors }) => (
-            <>
-              {fields.map((field, index) => (
-                <Form.Item
-                  {...formItemLayoutWithOutLabel}
-                  required={false}
-                  key={field.key}
-                >
-                  <Form.Item
-                    {...field}
-                    // validateTrigger={['onChange', 'onBlur']}
-                    // rules={[
-                    //   {
-                    //     required: true,
-                    //     whitespace: true,
-                    //     message: "请输入内容",
-                    //   },
-                    // ]}
-                    noStyle
-                  >
-                    <Input placeholder="请输入内容" style={{ width: '60%' }} />
-                  </Form.Item>
-                  {fields.length > 1 ? (
-                    <MinusCircleOutlined
-                      className="dynamic-delete-button"
-                      onClick={() => remove(field.name)}
-                    />
-                  ) : null}
-                </Form.Item>
-              ))}
-              <Form.Item>
-                <Button
-                  type="dashed"
-                  onClick={() => add()}
-                  style={{ width: '60%' }}
-                  icon={<PlusOutlined />}
-                >
-                  添加文案内容
-              </Button>
-                <Button
-                  type="dashed"
-                  onClick={() => {
-                    add('The head item', 0);
-                  }}
-                  style={{ width: '60%', marginTop: '20px' }}
-                  icon={<PlusOutlined />}
-                >
-                  添加自增数字
-              </Button>
-                <Form.ErrorList errors={errors} />
-              </Form.Item>
-            </>
-          )}
-        </Form.List> */}
-
         <Form.Item>
           <Button
             type="dashed"
@@ -228,33 +181,10 @@ class Home extends Component {
               </Button>
         </Form.Item>
         <Form.Item>
-          <Button type="primary" htmlType="submit">
+          <Button type="primary" onClick={this.copyToClipboard}>
             复制到剪切板
         </Button>
         </Form.Item>
-
-
-
-
-
-
-        {/* <Form.Item   >
-          <Input placeholder='请输入固定文案' width='300' />
-        </Form.Item>
-        <Form.Item >
-          <InputNumber min={0} max={10000} defaultValue={10} onChange={this.changeDemo} placeholder='请输入递增最大值'></InputNumber>
-        </Form.Item>
-        <Form.Item  >
-          <Input placeholder='请输入固定文案' width='300' />
-        </Form.Item>
-        <Form.Item >
-          <InputNumber min={0} max={10000} defaultValue={10} onChange={this.changeDemo} placeholder='请输入递增最大值'></InputNumber>
-        </Form.Item>
-        <Form.Item {...tailLayout}>
-          <Button type="default" >
-            复制到剪切板
-        </Button>
-        </Form.Item> */}
         <Divider>结果示例</Divider>
         <Form.Item>
           {content.forEach(t => {
@@ -263,33 +193,8 @@ class Home extends Component {
           {content.map((item, index) => (
             <p>{item}</p>
           ))}
-          {/* <p> select 1 from cc_comment_0 union </p>
-          <p> select 1 from cc_comment_0 union </p>
-          ...
-          <p> select 1 from cc_comment_0 union </p> */}
         </Form.Item>
       </Form>
-      // <div>
-      //   <div>
-      //       <Tag color="#2db7f5" onClick={this.addText}>固定文案</Tag>
-      //       <Tag color="#87d068" onClick={this.addNumText}>自增id</Tag>
-      //   </div>
-      //   <div>
-      //       <div>   <Input placeholder="请输入固定文案" /></div>
-      //       <div>  <Input placeholder="请输入固定文案" /></div>
-      //       <div>     <InputNumber min={0} max={10000} defaultValue={3} onChange={this.changeDemo} ></InputNumber></div>
-      //   </div>
-
-      //   <Button type="primary">Button</Button>
-      //   <Upload>
-      //     <Button>
-      //       <UploadOutlined /> Click to Upload
-      //     </Button>
-      //   </Upload>
-      //   <Popconfirm title="Are you sure delete this task?" okText="Yes" cancelText="No">
-      //     <Button>Confirm</Button>
-      //   </Popconfirm>
-      // </div>
     )
   }
 }
