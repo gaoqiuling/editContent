@@ -8,14 +8,13 @@
     "web": "react-app-rewired start",
     "start": "concurrently \"cross-env BROWSER=none PORT=3000 npm run web\" \"wait-on http://localhost:3000 && nodemon --watch main.js --exec npm run electron\"",
     "build": "react-app-rewired build",
-    "dist": "npm-run-all dist:*",
-    "packagemac": "npm run build && npm run distmac",
-    "package": "npm run build && npm run dist",
+    "package": "electron-packager . optText --win --out ./optTextApp --arch=x64 --app-version=1.0.0 --electron-version=1.4.13",
     "release": "npm run build && npm run upgrade && npm run dist && npm run deploy"
   },
   "dependencies": {
     "antd": "^4.9.4",
     "copy-to-clipboard": "^3.3.1",
+    "electron-is-dev": "^1.2.0",
     "moment": "^2.29.0",
     "react": "^16.13.1",
     "react-beautiful-dnd": "^13.0.0",
